@@ -1,35 +1,43 @@
-import { gql, useApolloClient } from '@apollo/client';
-import { useEffect, useState } from 'react';
+import { gql, useQuery } from '@apollo/client';
+import { Link } from 'react-router-dom';
 
 interface IMovie {
   id: string;
   title: string;
 }
 
-export default function Movies() {
-  const client = useApolloClient();
-  const [movies, setMovies] = useState<IMovie[]>([]);
+type AllMovies = {
+  allMovies: IMovie[];
+};
 
-  useEffect(() => {
-    client
-      .query({
-        query: gql`
-          {
-            allMovies {
-              id
-              title
-            }
-          }
-        `,
-      })
-      .then((result) => setMovies(result.data.allMovies));
-  }, [client]);
+const GET_MOVIES = gql`
+  query getMovies {
+    allMovies {
+      title
+      id
+    }
+  }
+`;
+
+export default function Movies() {
+  const { data, loading, error } = useQuery<AllMovies>(GET_MOVIES);
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
+  if (error) {
+    return <p>Could not fetch.</p>;
+  }
 
   return (
-    <div>
-      {movies.map((movie) => (
-        <li key={movie.id}>{movie.title}</li>
-      ))}
-    </div>
+    <ul>
+      {data &&
+        data.allMovies.map((movie) => (
+          <li key={movie.id}>
+            <Link to={`/movies/${movie.id}`}>{movie.title}</Link>
+          </li>
+        ))}
+    </ul>
   );
 }

@@ -1,0 +1,10 @@
+{
+  "name": "a_1_typechain",
+  "version": "0.0.0",
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^4.7.3"
+  }
+}

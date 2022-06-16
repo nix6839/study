@@ -1,1 +1,5 @@
-<p>This is another paragraph.</p>
+<script lang="ts">
+  export let answer = 'a mystery';
+</script>
+
+<p>The answer is {answer}.</p>

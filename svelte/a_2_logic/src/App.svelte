@@ -1,62 +1,112 @@
-<script>
-  import Info from './lib/Info.svelte';
-  import Nested from './lib/Nested.svelte';
+<script lang="ts">
+  import Thing from './lib/Thing.svelte';
 
-  const name = 'Nix';
-  const src = '/tutorial/image.gif';
-  const string = 'this string contains some <strong>HTML!!!</strong>';
+  const user = { loggedIn: false };
 
-  let count = 0;
-  $: doubled = count * 2;
-  function incrementCount() {
-    count += 1;
-  }
-  $: {
-    console.log('the count is ' + count);
-    // alert('I SAID THE COUNT IS ' + count);
-  }
-  $: if (count >= 10) {
-    // alert('count is dangerously high!');
-    count = 9;
+  function toggle() {
+    user.loggedIn = !user.loggedIn;
   }
 
-  const numbers = [1, 2, 3, 4];
-  function addNumber() {
-    numbers[numbers.length] = numbers.length + 1;
+  let x = 7;
+  function incrementX() {
+    x += 1;
   }
-  $: sum = numbers.reduce((sum, number) => sum + number);
+  function decrementX() {
+    x -= 1;
+  }
 
-  const pkg = {
-    name: 'svelte',
-    version: 3,
-    speed: 'blazing',
-    website: 'https://svelte.dev',
-  };
+  interface Cat {
+    id: string;
+    name: string;
+  }
+
+  const cats: Cat[] = [
+    { id: 'J---aiyznGQ', name: 'Keyboard Cat' },
+    { id: 'z_AbfPXTKms', name: 'Maru' },
+    { id: 'OUtn3pvWmpg', name: 'Henri The Existential Cat' },
+  ];
+
+  interface Thing {
+    id: number;
+    name: string;
+  }
+
+  let things: Thing[] = [
+    { id: 1, name: 'apple' },
+    { id: 2, name: 'banana' },
+    { id: 3, name: 'carrot' },
+    { id: 4, name: 'doughnut' },
+    { id: 5, name: 'egg' },
+  ];
+
+  function handleClick() {
+    things = things.slice(1);
+  }
+
+  async function getRandomNumber() {
+    const res = await fetch(`https://svelte.dev/tutorial/random-number`);
+    const text = await res.text();
+
+    if (!res.ok) {
+      throw new Error(text);
+    }
+    return text;
+  }
+
+  let promise = getRandomNumber();
+
+  function onGetRandomNumberClick() {
+    promise = getRandomNumber();
+  }
 </script>
 
-<h1>Hello, {name.toUpperCase()}!</h1>
-<img {src} alt="{name} dances." />
-<p>This is a paragraph.</p>
-<Nested answer="42" />
-<Nested />
-<p>{@html string}</p>
+<div>
+  {#if user.loggedIn}
+    <button type="button" on:click={toggle}>Log out</button>
+  {:else}
+    <button type="button" on:click={toggle}>Log in</button>
+  {/if}
+</div>
 
-<button on:click={incrementCount}>
-  Clicked {count}
-  {count === 1 ? 'time' : 'times'}
-</button>
-<p>{count} is doubled is {doubled}</p>
+{#if x > 10}
+  <p>{x} is greater than 10</p>
+{:else if x < 5}
+  <p>{x} is less than 5</p>
+{:else}
+  <p>{x} is between 5 and 10</p>
+{/if}
 
-<p>{numbers.join(' + ')} = {sum}</p>
+<div>
+  <button type="button" on:click={incrementX}>Increment X</button>
+  <button type="button" on:click={decrementX}>Decrement X</button>
+</div>
 
-<button on:click={addNumber}>Add a number</button>
+<ul>
+  {#each cats as { id, name }, i}
+    <li>
+      <a target="_blank" href="https://www.youtube.com/watch?v={id}">
+        {i + 1}: {name}
+      </a>
+    </li>
+  {/each}
+</ul>
 
-<Info {...pkg} />
+<button on:click={handleClick}>Remove first thing </button>
 
-<style>
-  p {
-    color: purple;
-    font-family: 'Pretendard', cursive;
-    font-size: 2em;
-  }
-</style>
+{#each things as { id, name } (id)}
+  <Thing {name} />
+{/each}
+
+<button on:click={onGetRandomNumberClick}>Generate random number</button>
+
+{#await promise}
+  <p>loading...</p>
+{:then number}
+  <p>The number is {number}</p>
+{:catch error}
+  <p style="color: red">{error.message}</p>
+{/await}
+
+{#await promise then number}
+  <p>The number is {number}</p>
+{/await}

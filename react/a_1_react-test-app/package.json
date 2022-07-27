@@ -8,7 +8,8 @@
     "dev": "vite",
     "preview": "vite preview",
     "test": "vitest",
-    "test:ui": "vitest --ui --api 5000"
+    "test:ui": "vitest --ui --api 5000",
+    "type-check": "tsc"
   },
   "dependencies": {
     "react": "18.2.0",

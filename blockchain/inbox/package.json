@@ -1,0 +1,25 @@
+{
+  "name": "inbox",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "deploy": "node --experimental-specifier-resolution=node dist/deploy.js contracts/Inbox.sol Inbox",
+    "test": "mocha test/**/*.ts"
+  },
+  "dependencies": {
+    "@truffle/hdwallet-provider": "^2.0.13",
+    "dotenv": "^16.0.1",
+    "solc": "^0.8.15",
+    "web3-eth-contract": "^1.7.5"
+  },
+  "devDependencies": {
+    "@types/mocha": "^9.1.1",
+    "@types/node": "16.11.47",
+    "ganache": "^7.4.0",
+    "mocha": "^10.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.7.4",
+    "web3": "^1.7.5"
+  }
+}

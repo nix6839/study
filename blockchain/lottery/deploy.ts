@@ -10,7 +10,7 @@ if (MNEMONIC === undefined) {
   throw new Error('Please set MNEMONIC');
 }
 if (INFURA_RINKEBY_PROJECT_ID === undefined) {
-  throw new Error('Please set INFURA_PROJECT_ID');
+  throw new Error('Please set INFURA_RINKEYBY_PROJECT_ID');
 }
 
 const [, , solidityPath, contractName] = process.argv;

@@ -1,13 +1,12 @@
+import { BigNumber, Contract, ethers } from 'ethers';
 import ganache from 'ganache';
 import { beforeEach, describe, test } from 'mocha';
 import * as assert from 'node:assert/strict';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import Web3 from 'web3';
-import { Contract } from 'web3-eth-contract';
 import compileSolidity from '../compile-solidity';
 
-const web3 = new Web3(
+const provider = new ethers.providers.Web3Provider(
   ganache.provider({
     logging: {
       logger: {
@@ -25,40 +24,43 @@ const { abi, byte } = compileSolidity(
   'Lottery',
 );
 
-let lottery: Contract;
+let lotteryCaller: Contract;
+let lotteryTx: Contract;
 let accounts: string[];
 
-async function enterAccounts(accounts: string[], eth: string = '0.02') {
-  for (const account of accounts) {
-    await lottery.methods
-      .enter()
-      .send({ from: account, value: web3.utils.toWei(eth, 'ether') });
+async function enterAccounts(cnt: number, eth: string = '0.02') {
+  for (let i = 0; i < cnt; i += 1) {
+    const tx = await lotteryTx.connect(provider.getSigner(i)).enter({
+      value: ethers.utils.parseEther(eth),
+    });
+    await tx.wait();
   }
 }
 
-async function getBalance(account: string): Promise<number> {
-  const balance = await web3.eth.getBalance(account);
-  return parseInt(balance, 10);
-}
-
 beforeEach(async () => {
-  accounts = await web3.eth.getAccounts();
-  lottery = await new web3.eth.Contract(abi)
-    .deploy({ data: byte })
-    .send({ from: accounts[0], gas: 1_000_000 });
+  accounts = await provider.listAccounts();
+
+  const lottery = await new ethers.ContractFactory(
+    abi,
+    byte,
+    provider.getSigner(),
+  ).deploy();
+  await lottery.deployTransaction.wait();
+
+  lotteryCaller = new ethers.Contract(lottery.address, abi, provider);
+  lotteryTx = new ethers.Contract(lottery.address, abi, provider.getSigner());
 });
 
 describe('Lottery Contract', () => {
   test('deploys a contract', () => {
-    assert.ok(lottery.options.address);
+    assert.ok(lotteryCaller.address);
+    assert.ok(lotteryTx.address);
   });
 
   test('allows multiple accounts to enter', async () => {
-    await enterAccounts(accounts.slice(0, 3));
+    await enterAccounts(3);
 
-    const players: string[] = await lottery.methods.getPlayers().call({
-      from: accounts[0],
-    });
+    const players: string[] = await lotteryCaller.getPlayers();
 
     assert.equal(accounts[0], players[0]);
     assert.equal(accounts[1], players[1]);
@@ -69,42 +71,40 @@ describe('Lottery Contract', () => {
 
   test('requires a minimum amount of ether to enter', async () => {
     await assert.rejects(async () => {
-      await lottery.methods.enter().send({
-        from: accounts[0],
-        value: 200,
-      });
+      const tx = await lotteryTx.enter({ value: 200 });
+      await tx.wait();
     });
   });
 
   test('only manager can call pickWinner()', async () => {
     await assert.rejects(async () => {
-      await lottery.methods.pickWinner().send({
-        from: accounts[1],
-      });
+      const tx = await lotteryTx.connect(provider.getSigner(1)).pickWinner();
+      await tx.wait();
     });
   });
 
   test('sends money to the winner and resets the players array', async () => {
-    await enterAccounts(accounts.slice(0, 1), '2');
+    const tx = await lotteryTx.enter({
+      value: ethers.utils.parseEther('2'),
+    });
+    await tx.wait();
 
-    async function getAccountBalance(): Promise<number> {
-      return getBalance(accounts[0]);
+    async function getAccountBalance(): Promise<BigNumber> {
+      return provider.getBalance(accounts[0]);
     }
 
     const initialBalance = await getAccountBalance();
-    await lottery.methods.pickWinner().send({ from: accounts[0] });
+    await (await lotteryTx.pickWinner()).wait();
     const finalBalance = await getAccountBalance();
-    const difference = finalBalance - initialBalance;
-    const moreThanWei = parseInt(web3.utils.toWei('1.8', 'ether'), 10);
+    const difference = finalBalance.sub(initialBalance);
+    const moreThanWei = ethers.utils.parseEther('1.8');
 
-    assert.ok(difference > moreThanWei);
+    assert.ok(moreThanWei.lt(difference));
 
-    const lotteryBalance = await getBalance(lottery.options.address);
-    assert.equal(lotteryBalance, 0);
+    const lotteryBalance = await provider.getBalance(lotteryCaller.address);
+    assert.ok(lotteryBalance.eq(0));
 
-    const players = await lottery.methods
-      .getPlayers()
-      .call({ from: accounts[0] });
+    const players: string[] = await lotteryCaller.getPlayers();
     assert.equal(players.length, 0);
   });
 });

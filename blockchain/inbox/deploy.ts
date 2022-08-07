@@ -1,17 +1,16 @@
-import HDWalletProvider from '@truffle/hdwallet-provider';
 import * as dotenv from 'dotenv';
-import Web3 from 'web3';
+import { ethers } from 'ethers';
 import compileSolidity from './compile-solidity';
 
 dotenv.config();
 
-const { MNEMONIC, INFURA_RINKEBY_ENDPOINT } = process.env;
+const { MNEMONIC, INFURA_RINKEBY_PROJECT_ID } = process.env;
 
 if (MNEMONIC === undefined) {
   throw new Error('Please set MNEMONIC');
 }
-if (INFURA_RINKEBY_ENDPOINT === undefined) {
-  throw new Error('Please set INFURA_RINKEBY_ENDPOINT');
+if (INFURA_RINKEBY_PROJECT_ID === undefined) {
+  throw new Error('Please set INFURA_PROJECT_ID');
 }
 
 const [, , solidityPath, contractName] = process.argv;
@@ -25,18 +24,18 @@ if (contractName === undefined) {
 
 const { abi, byte } = compileSolidity(solidityPath, contractName);
 
-const provider = new HDWalletProvider(MNEMONIC, INFURA_RINKEBY_ENDPOINT);
-const web3 = new Web3(provider);
+console.log('ABI', JSON.stringify(abi));
 
-const [account] = await web3.eth.getAccounts();
-console.log('Attempting to deploy from account', account);
+const provider = new ethers.providers.InfuraProvider(
+  'rinkeby',
+  INFURA_RINKEBY_PROJECT_ID,
+);
+const wallet = ethers.Wallet.fromMnemonic(MNEMONIC);
+const account = wallet.connect(provider);
+const contract = await new ethers.ContractFactory(abi, byte, account).deploy(
+  'Hi there!',
+);
 
-const contract = await new web3.eth.Contract(abi)
-  .deploy({
-    data: byte,
-    arguments: ['Hi there!'],
-  })
-  .send({ gas: 1_000_000, from: account });
+await contract.deployTransaction.wait();
 
-console.log('Contract deployed to ', contract.options.address);
-provider.engine.stop();
+console.log('Contract deployed to ', contract.address);

@@ -1,10 +1,9 @@
+import { Contract, ethers } from 'ethers';
 import ganache from 'ganache';
 import { beforeEach, describe, test } from 'mocha';
 import * as assert from 'node:assert/strict';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import Web3 from 'web3';
-import { Contract } from 'web3-eth-contract';
 import compileSolidity from '../compile-solidity';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -14,7 +13,7 @@ const { abi, byte } = compileSolidity(
   'Inbox',
 );
 
-const web3 = new Web3(
+const provider = new ethers.providers.Web3Provider(
   ganache.provider({
     logging: {
       logger: {
@@ -25,36 +24,40 @@ const web3 = new Web3(
 );
 
 let accounts: string[];
-let inbox: Contract;
+let inboxCaller: Contract;
+let inboxTx: Contract;
 const INITIAL_STRING = 'Hi there!';
 
 beforeEach(async () => {
   // Get a list of all accounts
-  accounts = await web3.eth.getAccounts();
+  accounts = await provider.listAccounts();
 
   // Use one of those accounts to deploy the contract
-  inbox = await new web3.eth.Contract(abi)
-    .deploy({
-      data: byte,
-      arguments: [INITIAL_STRING],
-    })
-    .send({ from: accounts[0], gas: 1_000_000 });
+  const inbox = await new ethers.ContractFactory(
+    abi,
+    byte,
+    provider.getSigner(),
+  ).deploy(INITIAL_STRING);
+  await inbox.deployTransaction.wait();
+
+  inboxCaller = new ethers.Contract(inbox.address, abi, provider);
+  inboxTx = new ethers.Contract(inbox.address, abi, provider.getSigner());
 });
 
 describe('Inbox', () => {
   test('deploys a contract', () => {
-    assert.ok(inbox.options.address);
+    assert.ok(inboxCaller.address);
   });
 
   test('has a default message', async () => {
-    const message = await inbox.methods.message().call();
+    const message: string = await inboxCaller.message();
     assert.equal(message, INITIAL_STRING);
   });
 
   test('can change the message', async () => {
     const changedMessage = 'bye';
-    await inbox.methods.setMessage(changedMessage).send({ from: accounts[0] });
-    const message = await inbox.methods.message().call();
+    await (await inboxTx.setMessage(changedMessage)).wait();
+    const message: string = await inboxCaller.message();
     assert.equal(message, changedMessage);
   });
 });

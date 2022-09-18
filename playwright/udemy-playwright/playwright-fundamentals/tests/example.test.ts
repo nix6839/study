@@ -64,7 +64,7 @@ test.describe('My first test suite', () => {
   });
 });
 
-test.describe.parallel.only('Hooks', () => {
+test.describe.parallel('Hooks', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('https://example.com');
   });

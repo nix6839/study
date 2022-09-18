@@ -1,0 +1,17 @@
+{
+  "name": "playwright-e2e",
+  "version": "1.0.0",
+  "description": "Automated software testing with Playwright",
+  "main": "index.js",
+  "scripts": {
+    "test:chromium": "playwright test --project Chromium",
+    "test:firefox": "playwright test --project Firefox",
+    "test:webkit": "playwright test --project Webkit"
+  },
+  "prettier": "@nix6839/prettier-config",
+  "devDependencies": {
+    "@nix6839/prettier-config": "^1.0.3",
+    "@playwright/test": "^1.25.2",
+    "prettier": "^2.7.1"
+  }
+}

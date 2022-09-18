@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { assertTitle, loadHomepage } from '../helpers';
+import { assertTitle, loadHomepage } from '../helpers.js';
 
 test.describe('My first test suite', () => {
   test('Simple basic test', async ({ page }) => {
@@ -19,7 +19,8 @@ test.describe('My first test suite', () => {
     );
   });
 
-  //playwright.dev/docs/selectors#selecting-visible-elements
+  // https://playwright.dev/docs/selectors#selecting-visible-elements
+  // eslint-disable-next-line playwright/no-skipped-test
   test.skip('Selectors', async ({ page }) => {
     // text
     await page.click('text=some text');
@@ -60,7 +61,7 @@ test.describe('My first test suite', () => {
     await expect(element).toHaveCount(1);
 
     const nonExistingElement = page.locator('h5');
-    await expect(nonExistingElement).not.toBeVisible();
+    await expect(nonExistingElement).toBeHidden();
   });
 });
 

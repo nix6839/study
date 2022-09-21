@@ -10,13 +10,15 @@
     "test:webkit": "playwright test --project Webkit",
     "test:e2e": "playwright test --config tests/e2e/",
     "test:visual": "playwright test --config tests/visual/",
-    "test:visual:update": "playwright test --config tests/visual/ -u"
+    "test:visual:update": "playwright test --config tests/visual/ -u",
+    "test:api": "playwright test --config tests/api/"
   },
   "prettier": "@nix6839/prettier-config",
   "devDependencies": {
     "@nix6839/prettier-config": "^1.0.3",
     "@playwright/test": "^1.26.0",
     "@types/eslint": "^8.4.6",
+    "@types/node": "^16.11.59",
     "@typescript-eslint/eslint-plugin": "^5.38.0",
     "@typescript-eslint/parser": "^5.38.0",
     "eslint": "^8.23.1",

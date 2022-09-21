@@ -1,0 +1,4 @@
+playwright-report/
+test-results/
+/screenshot.png
+/single-element-screenshot.png

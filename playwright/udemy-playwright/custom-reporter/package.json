@@ -1,0 +1,31 @@
+{
+  "name": "playwright-api",
+  "version": "1.0.0",
+  "description": "Automated software testing with Playwright",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint '**/*.ts'",
+    "test": "playwright test",
+    "test:e2e": "playwright test --config tests/e2e/",
+    "test:visual": "playwright test --config tests/visual/",
+    "test:visual:update": "playwright test --config tests/visual/ -u",
+    "test:api": "playwright test --config tests/api/",
+    "open:iPhone11:wikipedia": "playwright open --timezone 'Europe/Rome' --lang 'it-IT' --device 'iPhone 11' wikipedia.org",
+    "pdf:wikipedia": "playwright pdf wikipedia.org wikipedia.pdf",
+    "screenshot:twitter": "playwright screenshot --device 'iPhone 11' --color-scheme dark --wait-for-timeout 3000 twitter.com twitter-iPhone-dark.png",
+    "test:custom-reporter": "playwright test --config tests/custom-reporter/ --reporter tests/custom-reporter/reporter.ts"
+  },
+  "prettier": "@nix6839/prettier-config",
+  "devDependencies": {
+    "@nix6839/prettier-config": "^1.0.3",
+    "@playwright/test": "^1.26.0",
+    "@types/eslint": "^8.4.6",
+    "@types/node": "^16.11.59",
+    "@typescript-eslint/eslint-plugin": "^5.38.0",
+    "@typescript-eslint/parser": "^5.38.0",
+    "eslint": "^8.23.1",
+    "eslint-plugin-playwright": "^0.11.1",
+    "prettier": "^2.7.1",
+    "typescript": "^4.8.3"
+  }
+}

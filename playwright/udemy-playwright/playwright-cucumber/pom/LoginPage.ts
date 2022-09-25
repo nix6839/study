@@ -1,27 +1,30 @@
 import { expect } from 'expect';
+import { Page } from 'playwright';
 
 export default class LoginPage {
+  constructor(private readonly page: Page) {}
+
   async visit() {
-    await page.goto('https://www.saucedemo.com/');
+    await this.page.goto('https://www.saucedemo.com/');
   }
 
   async submitLoginForm() {
-    await page.fill('#user-name', 'standard_user');
-    await page.fill('#password', 'secret_sauce');
-    await page.click('#login-button');
+    await this.page.fill('#user-name', 'standard_user');
+    await this.page.fill('#password', 'secret_sauce');
+    await this.page.click('#login-button');
   }
 
   async submitLoginWithParameters(username: string, password: string) {
-    await page.fill('#user-name', username);
-    await page.fill('#password', password);
-    await page.click('#login-button');
+    await this.page.fill('#user-name', username);
+    await this.page.fill('#password', password);
+    await this.page.click('#login-button');
   }
 
   async assertUserIsLoggedIn() {
-    expect(page.url()).toBe('https://www.saucedemo.com/inventory.html');
+    expect(this.page.url()).toBe('https://www.saucedemo.com/inventory.html');
   }
 
   async pause() {
-    await page.waitForTimeout(3000);
+    await this.page.waitForTimeout(3000);
   }
 }

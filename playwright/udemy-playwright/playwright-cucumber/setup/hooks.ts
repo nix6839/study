@@ -1,24 +1,27 @@
 import { After, AfterAll, Before, BeforeAll } from '@cucumber/cucumber';
 import * as playwright from 'playwright';
+import { ThisInfo } from './types.js';
 
-BeforeAll(async () => {
+let browser: playwright.Browser;
+
+BeforeAll(async function (this: ThisInfo) {
   console.log('Launch browser');
-  globalThis.browser = await playwright.chromium.launch({ headless: false });
+  browser = await playwright.chromium.launch({ headless: false });
 });
 
-AfterAll(async () => {
+AfterAll(async function (this: ThisInfo) {
   console.log('Close browser');
-  await globalThis.browser.close();
+  await browser.close();
 });
 
-Before(async () => {
+Before(async function (this: ThisInfo) {
   console.log('Create new context and page');
-  globalThis.context = await globalThis.browser.newContext();
-  globalThis.page = await globalThis.context.newPage();
+  this.context = await browser.newContext();
+  this.page = await this.context.newPage();
 });
 
-After(async () => {
+After(async function (this: ThisInfo) {
   console.log('Close context and page');
-  await globalThis.page.close();
-  await globalThis.context.close();
+  await this.page.close();
+  await this.context.close();
 });

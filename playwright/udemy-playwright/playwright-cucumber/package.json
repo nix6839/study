@@ -2,12 +2,12 @@
   "name": "playwright-cucumber",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "license": "MIT",
+  "type": "module",
   "scripts": {
     "format": "prettier --write '**/*.{ts,json}'",
-    "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' cucumber-js",
-    "report": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' node reporter.ts"
+    "report": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' node reporter.ts",
+    "test": "NODE_OPTIONS='--loader ts-node/esm --no-warnings' cucumber-js"
   },
   "prettier": "@nix6839/prettier-config",
   "devDependencies": {

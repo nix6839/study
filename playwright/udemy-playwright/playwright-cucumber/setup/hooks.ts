@@ -4,12 +4,12 @@ import { ThisInfo } from './types.js';
 
 let browser: playwright.Browser;
 
-BeforeAll(async function (this: ThisInfo) {
+BeforeAll(async () => {
   console.log('Launch browser');
   browser = await playwright.chromium.launch({ headless: false });
 });
 
-AfterAll(async function (this: ThisInfo) {
+AfterAll(async () => {
   console.log('Close browser');
   await browser.close();
 });
